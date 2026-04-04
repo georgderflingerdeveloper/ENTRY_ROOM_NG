@@ -274,8 +274,8 @@
                 "tot": "num"
             }
         ],
-        "x": 1040,
-        "y": 160,
+        "x": 1080,
+        "y": 100,
         "wires": [
             [
                 "debug_real_output"
@@ -296,8 +296,8 @@
                 "tot": "num"
             }
         ],
-        "x": 1040,
-        "y": 200,
+        "x": 1080,
+        "y": 280,
         "wires": [
             [
                 "debug_real_output"
@@ -317,8 +317,8 @@
         "targetType": "msg",
         "statusVal": "payload",
         "statusType": "auto",
-        "x": 1240,
-        "y": 180,
+        "x": 1410,
+        "y": 200,
         "wires": []
     },
     {
