@@ -199,8 +199,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 340,
-        "y": 360,
+        "x": 460,
+        "y": 440,
         "wires": [
             [
                 "function_light_logic"
