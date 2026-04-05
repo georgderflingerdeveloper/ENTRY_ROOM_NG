@@ -354,7 +354,7 @@
         "name": "HAUPTLICHT",
         "channel": 0,
         "deviceSerialNumber": "311883",
-        "isHubPortDevice": false,
+        "isHubPortDevice": true,
         "hubPort": 0,
         "debug": true,
         "LEDCurrentLimit": 0.02,
