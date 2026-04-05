@@ -260,17 +260,25 @@
         "rules": [
             {
                 "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "setState",
+                "tot": "str"
+            },
+            {
+                "t": "set",
                 "p": "payload",
                 "pt": "msg",
-                "to": "1",
-                "tot": "num"
+                "to": "true",
+                "tot": "bool"
             }
         ],
         "x": 1080,
         "y": 100,
         "wires": [
             [
-                "debug_real_output"
+                "debug_real_output",
+                "e7373a8944a85d35"
             ]
         ]
     },
@@ -356,8 +364,8 @@
         "hostname": "localhost",
         "debug": false,
         "retry": false,
-        "x": 1240,
-        "y": 400,
+        "x": 120,
+        "y": 40,
         "wires": [
             []
         ]
@@ -376,7 +384,7 @@
         "LEDForwardVoltage": 1,
         "openTimeout": "5000",
         "x": 1400,
-        "y": 520,
+        "y": 100,
         "wires": [
             []
         ]
