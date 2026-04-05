@@ -1,13 +1,5 @@
 [
     {
-        "id": "219754c780d2db2b",
-        "type": "tab",
-        "label": "Flow 1",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "entry_room_light_tab",
         "type": "tab",
         "label": "ENTRY_ROOM_LIGHT_CONTROL",
@@ -20,7 +12,7 @@
         "z": "entry_room_light_tab",
         "name": "Entry room light control",
         "info": "Short button press toggles light\nLong button press schedules OFF in 2 minutes\nPresence restarts 30 minute timer\nUDP commands: LIGHT ON, LIGHT OFF, ALL OFF, PRESENCE",
-        "x": 170,
+        "x": 640,
         "y": 40,
         "wires": []
     },
@@ -278,7 +270,8 @@
         "y": 100,
         "wires": [
             [
-                "debug_real_output"
+                "debug_real_output",
+                "4c517db5f542993f"
             ]
         ]
     },
@@ -354,5 +347,24 @@
         "x": 830,
         "y": 280,
         "wires": []
+    },
+    {
+        "id": "4c517db5f542993f",
+        "type": "phidget22-digitaloutput",
+        "z": "entry_room_light_tab",
+        "name": "HAUPTLICHT",
+        "channel": 0,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "LEDCurrentLimit": 0.02,
+        "LEDForwardVoltage": 1,
+        "openTimeout": "5000",
+        "x": 1420,
+        "y": 80,
+        "wires": [
+            []
+        ]
     }
 ]
