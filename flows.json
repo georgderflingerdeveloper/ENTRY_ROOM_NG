@@ -480,7 +480,7 @@
         "LEDCurrentLimit": 0.02,
         "LEDForwardVoltage": 1,
         "openTimeout": "5000",
-        "x": 800,
+        "x": 820,
         "y": 680,
         "wires": [
             []
