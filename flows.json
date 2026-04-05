@@ -290,17 +290,25 @@
         "rules": [
             {
                 "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "setState",
+                "tot": "str"
+            },
+            {
+                "t": "set",
                 "p": "payload",
                 "pt": "msg",
-                "to": "0",
-                "tot": "num"
+                "to": "false",
+                "tot": "bool"
             }
         ],
         "x": 1080,
         "y": 280,
         "wires": [
             [
-                "debug_real_output"
+                "debug_real_output",
+                "e7373a8944a85d35"
             ]
         ]
     },
