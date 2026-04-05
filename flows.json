@@ -262,7 +262,7 @@
                 "t": "set",
                 "p": "topic",
                 "pt": "msg",
-                "to": "setState",
+                "to": "setDutyCycle",
                 "tot": "str"
             },
             {
@@ -292,7 +292,7 @@
                 "t": "set",
                 "p": "topic",
                 "pt": "msg",
-                "to": "setState",
+                "to": "setDutyCycle",
                 "tot": "str"
             },
             {
