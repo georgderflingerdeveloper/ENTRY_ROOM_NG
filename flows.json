@@ -184,7 +184,7 @@
         "type": "function",
         "z": "entry_room_light_tab",
         "name": "Parse UDP Command",
-        "func": "const udpText = (msg.payload || '').toString().trim().toUpperCase();\n\nif (udpText === 'LIGHT ON') {\n    return { topic: 'udp_light_on' };\n}\nif (udpText === 'LIGHT OFF') {\n    return { topic: 'udp_light_off' };\n}\nif (udpText === 'ALL OFF') {\n    return { topic: 'udp_all_off' };\n}\nif (udpText === 'PRESENCE') {\n    return { topic: 'presence_detected' };\n}\n\nreturn {\n    topic: 'status_message_only',\n    payload: 'Unknown UDP command: ' + udpText\n};",
+        "func": "const udpText = (msg.payload || '').toString().trim().toUpperCase();\n\nif (udpText === '_3_True') {\n    return { topic: 'udp_light_on' };\n}\nif (udpText === '_3_False') {\n    return { topic: 'udp_light_off' };\n}\nif (udpText === 'ALL OFF') {\n    return { topic: 'udp_all_off' };\n}\nif (udpText === 'PRESENCE') {\n    return { topic: 'presence_detected' };\n}\n\nreturn {\n    topic: 'status_message_only',\n    payload: 'Unknown UDP command: ' + udpText\n};",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
