@@ -346,24 +346,5 @@
         "x": 830,
         "y": 280,
         "wires": []
-    },
-    {
-        "id": "4c517db5f542993f",
-        "type": "phidget22-digitaloutput",
-        "z": "entry_room_light_tab",
-        "name": "HAUPTLICHT",
-        "channel": 0,
-        "deviceSerialNumber": "311883",
-        "isHubPortDevice": true,
-        "hubPort": 0,
-        "debug": true,
-        "LEDCurrentLimit": 0.02,
-        "LEDForwardVoltage": 1,
-        "openTimeout": "5000",
-        "x": 1420,
-        "y": 80,
-        "wires": [
-            []
-        ]
     }
 ]
