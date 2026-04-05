@@ -396,5 +396,94 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "a1b2c3d4e5f60101",
+        "type": "inject",
+        "z": "entry_room_light_tab",
+        "name": "START Blink",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"enable\":true,\"intervalMs\":500}",
+        "payloadType": "json",
+        "x": 330,
+        "y": 640,
+        "wires": [
+            [
+                "a1b2c3d4e5f60103"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60102",
+        "type": "inject",
+        "z": "entry_room_light_tab",
+        "name": "STOP Blink",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"enable\":false}",
+        "payloadType": "json",
+        "x": 330,
+        "y": 700,
+        "wires": [
+            [
+                "a1b2c3d4e5f60103"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60103",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "BLINKER Phidget",
+        "func": "// BLINKER Phidget\n// Input:\n// msg.payload.enable     : true / false\n// msg.payload.intervalMs : Blinkzeit in ms, optional\n//\n// Output passend fuer Phidget DigitalOutput:\n// msg.topic   = \"setDutyCycle\"\n// msg.payload = { dutyCycle: 0 | 1 }\n\nlet timer = context.get(\"blinkTimer\");\nlet outputState = context.get(\"outputState\") || 0;\n\nlet enable = false;\nlet intervalMs = 500;\n\nif (typeof msg.payload === \"object\" && msg.payload !== null) {\n    enable = !!msg.payload.enable;\n    if (msg.payload.intervalMs !== undefined) {\n        intervalMs = Number(msg.payload.intervalMs);\n    } else {\n        intervalMs = context.get(\"intervalMs\") || 500;\n    }\n} else {\n    node.warn(\"Expected msg.payload as object: { enable: true/false, intervalMs?: number }\");\n    return null;\n}\n\nif (!Number.isFinite(intervalMs) || intervalMs < 50) {\n    intervalMs = 500;\n}\n\ncontext.set(\"intervalMs\", intervalMs);\n\nfunction buildPhidgetMessage(dutyCycle) {\n    return {\n        topic: \"setDutyCycle\",\n        payload: {\n            dutyCycle: dutyCycle\n        }\n    };\n}\n\n// STOP blinking\nif (!enable) {\n    if (timer) {\n        clearInterval(timer);\n        context.set(\"blinkTimer\", null);\n    }\n\n    outputState = 0;\n    context.set(\"outputState\", outputState);\n    node.status({ fill: \"grey\", shape: \"ring\", text: \"stopped\" });\n\n    return buildPhidgetMessage(0);\n}\n\n// Restart timer cleanly\nif (timer) {\n    clearInterval(timer);\n    context.set(\"blinkTimer\", null);\n}\n\n// Start state: ON immediately\noutputState = 1;\ncontext.set(\"outputState\", outputState);\nnode.status({ fill: \"green\", shape: \"dot\", text: \"blinking \" + intervalMs + \" ms\" });\n\nconst intervalHandle = setInterval(function () {\n    let currentState = context.get(\"outputState\") || 0;\n    currentState = currentState ? 0 : 1;\n    context.set(\"outputState\", currentState);\n\n    node.send(buildPhidgetMessage(currentState));\n}, intervalMs);\n\ncontext.set(\"blinkTimer\", intervalHandle);\n\nreturn buildPhidgetMessage(1);",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "let timer = context.get(\"blinkTimer\");\nif (timer) {\n    clearInterval(timer);\n    context.set(\"blinkTimer\", null);\n}\ncontext.set(\"outputState\", 0);",
+        "libs": [],
+        "x": 570,
+        "y": 670,
+        "wires": [
+            [
+                "dad6b01b7ba5fc57"
+            ]
+        ]
+    },
+    {
+        "id": "dad6b01b7ba5fc57",
+        "type": "phidget22-digitaloutput",
+        "z": "entry_room_light_tab",
+        "name": "",
+        "channel": "1",
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "LEDCurrentLimit": 0.02,
+        "LEDForwardVoltage": 1,
+        "openTimeout": "5000",
+        "x": 800,
+        "y": 680,
+        "wires": [
+            []
+        ]
     }
 ]
