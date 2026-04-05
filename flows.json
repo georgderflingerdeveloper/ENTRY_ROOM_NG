@@ -346,5 +346,20 @@
         "x": 830,
         "y": 280,
         "wires": []
+    },
+    {
+        "id": "102a52c690c4878f",
+        "type": "phidget22-connect",
+        "z": "entry_room_light_tab",
+        "name": "",
+        "port": "5661",
+        "hostname": "localhost",
+        "debug": false,
+        "retry": false,
+        "x": 880,
+        "y": 420,
+        "wires": [
+            []
+        ]
     }
 ]
