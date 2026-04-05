@@ -353,7 +353,7 @@
         "z": "entry_room_light_tab",
         "name": "HAUPTLICHT",
         "channel": 0,
-        "deviceSerialNumber": "311883",
+        "deviceSerialNumber": "-1",
         "isHubPortDevice": false,
         "hubPort": 0,
         "debug": false,
