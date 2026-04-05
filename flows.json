@@ -299,8 +299,8 @@
                 "t": "set",
                 "p": "payload",
                 "pt": "msg",
-                "to": "0",
-                "tot": "num"
+                "to": "{\"dutyCycle\":0}",
+                "tot": "json"
             }
         ],
         "x": 1080,
