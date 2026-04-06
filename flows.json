@@ -500,7 +500,7 @@
         "type": "debug",
         "z": "entry_room_light_tab",
         "name": "UDP Status",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": true,
@@ -528,8 +528,25 @@
         "y": 460,
         "wires": [
             [
-                "function_light_logic"
+                "function_light_logic",
+                "cec4cc352f9ac489"
             ]
         ]
+    },
+    {
+        "id": "cec4cc352f9ac489",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 540,
+        "wires": []
     }
 ]
