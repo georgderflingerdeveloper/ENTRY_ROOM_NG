@@ -565,7 +565,25 @@
         "x": 400,
         "y": 80,
         "wires": [
-            []
+            [
+                "b9ec817da9d1d69d"
+            ]
         ]
+    },
+    {
+        "id": "b9ec817da9d1d69d",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 80,
+        "wires": []
     }
 ]
