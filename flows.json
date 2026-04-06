@@ -548,5 +548,24 @@
         "x": 1040,
         "y": 540,
         "wires": []
+    },
+    {
+        "id": "f299c88db9c5ae1a",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "",
+        "channel": 0,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 400,
+        "y": 80,
+        "wires": [
+            []
+        ]
     }
 ]
