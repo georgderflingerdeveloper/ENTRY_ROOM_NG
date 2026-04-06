@@ -183,7 +183,8 @@
         "y": 360,
         "wires": [
             [
-                "function_parse_udp"
+                "function_parse_udp",
+                "1b8241e07b65a1ce"
             ]
         ]
     },
@@ -493,5 +494,22 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "1b8241e07b65a1ce",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "UDP Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 430,
+        "y": 360,
+        "wires": []
     }
 ]
