@@ -174,7 +174,7 @@
         "z": "entry_room_light_tab",
         "name": "UDP Input Commands",
         "iface": "",
-        "port": "5005",
+        "port": "57982",
         "ipv": "udp4",
         "multicast": "false",
         "group": "",
