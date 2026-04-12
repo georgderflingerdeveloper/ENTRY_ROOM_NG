@@ -647,7 +647,8 @@
         "y": 600,
         "wires": [
             [
-                "debug_countdown_status_01"
+                "debug_countdown_status_01",
+                "entry_room_countdown_display_editor"
             ]
         ]
     },
@@ -671,6 +672,24 @@
                 "entry_room_countdown_info_01",
                 "switch_boolean_to_numeric"
             ],
+            []
+        ]
+    },
+    {
+        "id": "entry_room_countdown_display_editor",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "Countdown Display (Editor)",
+        "func": "if (msg.topic !== 'countdown_status') {\n    return null;\n}\n\nif (!msg.payload || typeof msg.payload !== 'object') {\n    node.status({ fill: 'grey', shape: 'ring', text: '--:--' });\n    return null;\n}\n\nif (msg.payload.active) {\n    const text = msg.payload.remaining_text || '--:--';\n    const mode = msg.payload.mode || 'idle';\n\n    if (mode === 'delayed_off') {\n        node.status({ fill: 'yellow', shape: 'dot', text: text });\n    } else if (mode === 'presence_hold') {\n        node.status({ fill: 'green', shape: 'dot', text: text });\n    } else {\n        node.status({ fill: 'blue', shape: 'ring', text: text });\n    }\n} else {\n    node.status({ fill: 'grey', shape: 'ring', text: '--:--' });\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "node.status({});",
+        "libs": [],
+        "x": 1200,
+        "y": 680,
+        "wires": [
             []
         ]
     }
