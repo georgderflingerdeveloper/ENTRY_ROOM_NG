@@ -472,7 +472,8 @@
         "y": 670,
         "wires": [
             [
-                "dad6b01b7ba5fc57"
+                "dad6b01b7ba5fc57",
+                "84fecefa43164192"
             ]
         ]
     },
@@ -584,6 +585,23 @@
         "statusType": "auto",
         "x": 600,
         "y": 80,
+        "wires": []
+    },
+    {
+        "id": "84fecefa43164192",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "DEBUG_BLINKER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 870,
+        "y": 880,
         "wires": []
     }
 ]
