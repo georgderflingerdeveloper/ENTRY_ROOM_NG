@@ -229,7 +229,8 @@
             ],
             [
                 "debug_light_status",
-                "toggle_node_3_channel"
+                "toggle_node_3_channel",
+                "entry_room_countdown_info_01"
             ]
         ]
     },
@@ -718,6 +719,43 @@
         "statusType": "auto",
         "x": 480,
         "y": 880,
+        "wires": []
+    },
+    {
+        "id": "entry_room_countdown_info_01",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "Entry Room Countdown Info",
+        "func": "// Countdown info node for entry room light logic\n// Connect this node to the outputs of the main light logic.\n//\n// Expected inputs from main logic:\n// - topic: light_command, payload: boolean, reason: string\n// - topic: light_status, payload: object or string\n//\n// Output:\n// - topic: countdown_status\n// - payload: {\n//     active: true/false,\n//     mode: 'presence_hold' | 'delayed_off' | 'idle',\n//     remaining_sec: number,\n//     remaining_text: string,\n//     reason: string\n//   }\n\nconst PRESENCE_HOLD_TIME_MS = 30 * 60 * 1000;\nconst DELAYED_OFF_TIME_MS = 2 * 60 * 1000;\n\nfunction formatRemainingText(totalSec) {\n    const min = Math.floor(totalSec / 60);\n    const sec = totalSec % 60;\n    return String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');\n}\n\nfunction clearTicker() {\n    const handle = context.get('tickerHandle');\n    if (handle) {\n        clearInterval(handle);\n    }\n\n    context.set('tickerHandle', null);\n    context.set('countdownMode', 'idle');\n    context.set('countdownEndTime', 0);\n}\n\nfunction emitCountdown(reasonText) {\n    const mode = context.get('countdownMode') || 'idle';\n    const endTime = context.get('countdownEndTime') || 0;\n\n    if (mode === 'idle' || endTime <= 0) {\n        node.send({\n            topic: 'countdown_status',\n            payload: {\n                active: false,\n                mode: 'idle',\n                remaining_sec: 0,\n                remaining_text: '00:00',\n                reason: reasonText\n            }\n        });\n        return;\n    }\n\n    const remainingMs = Math.max(0, endTime - Date.now());\n    const remainingSec = Math.ceil(remainingMs / 1000);\n\n    node.send({\n        topic: 'countdown_status',\n        payload: {\n            active: remainingSec > 0,\n            mode: mode,\n            remaining_sec: remainingSec,\n            remaining_text: formatRemainingText(remainingSec),\n            reason: reasonText\n        }\n    });\n}\n\nfunction startCountdown(mode, durationMs, reasonText) {\n    clearTicker();\n\n    const endTime = Date.now() + durationMs;\n\n    context.set('countdownMode', mode);\n    context.set('countdownEndTime', endTime);\n\n    emitCountdown(reasonText);\n\n    const handle = setInterval(function () {\n        const currentMode = context.get('countdownMode') || 'idle';\n        const currentEndTime = context.get('countdownEndTime') || 0;\n\n        if (currentMode === 'idle' || currentEndTime <= 0) {\n            clearTicker();\n            return;\n        }\n\n        const remainingMs = currentEndTime - Date.now();\n\n        if (remainingMs <= 0) {\n            emitCountdown('countdown_elapsed');\n            clearTicker();\n            return;\n        }\n\n        emitCountdown('countdown_tick');\n    }, 1000);\n\n    context.set('tickerHandle', handle);\n}\n\nfunction stopCountdown(reasonText) {\n    clearTicker();\n    emitCountdown(reasonText);\n}\n\nfunction extractReason(msg) {\n    if (msg && typeof msg.reason === 'string') {\n        return msg.reason;\n    }\n\n    if (msg && msg.payload && typeof msg.payload.reason === 'string') {\n        return msg.payload.reason;\n    }\n\n    if (msg && typeof msg.payload === 'string') {\n        return msg.payload;\n    }\n\n    return '';\n}\n\nconst reason = extractReason(msg);\n\nif (msg.topic === 'light_command') {\n    if (msg.payload === true) {\n        startCountdown('presence_hold', PRESENCE_HOLD_TIME_MS, reason || 'light_on');\n        return null;\n    }\n\n    if (msg.payload === false) {\n        stopCountdown(reason || 'light_off');\n        return null;\n    }\n\n    return null;\n}\n\nif (msg.topic === 'light_status') {\n    if (\n        reason === 'presence_detected' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('Presence detected -> 30 minute timer restarted') >= 0)\n    ) {\n        startCountdown('presence_hold', PRESENCE_HOLD_TIME_MS, 'presence_restart');\n        return null;\n    }\n\n    if (\n        reason === 'udp_light_longpush' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('Long push detected') >= 0)\n    ) {\n        startCountdown('delayed_off', DELAYED_OFF_TIME_MS, 'delayed_off_started');\n        return null;\n    }\n\n    if (\n        reason === 'delayed_off_time_elapsed' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('delayed_off_time_elapsed') >= 0)\n    ) {\n        stopCountdown('delayed_off_elapsed');\n        return null;\n    }\n\n    if (\n        reason === 'presence_hold_time_elapsed' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('presence_hold_time_elapsed') >= 0)\n    ) {\n        stopCountdown('presence_hold_elapsed');\n        return null;\n    }\n\n    if (\n        msg.payload &&\n        typeof msg.payload === 'object' &&\n        msg.payload.xLightOutputActive === false\n    ) {\n        stopCountdown(reason || 'light_off_status');\n        return null;\n    }\n\n    return null;\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "const handle = context.get('tickerHandle');\nif (handle) {\n    clearInterval(handle);\n}\ncontext.set('tickerHandle', null);\ncontext.set('countdownMode', 'idle');\ncontext.set('countdownEndTime', 0);",
+        "libs": [],
+        "x": 900,
+        "y": 340,
+        "wires": [
+            [
+                "debug_countdown_status_01"
+            ]
+        ]
+    },
+    {
+        "id": "debug_countdown_status_01",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "Countdown Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 360,
         "wires": []
     }
 ]
