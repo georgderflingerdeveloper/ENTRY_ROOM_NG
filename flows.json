@@ -615,23 +615,6 @@
         "wires": []
     },
     {
-        "id": "debug_countdown_status_01",
-        "type": "debug",
-        "z": "entry_room_light_tab",
-        "name": "Countdown Status",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1190,
-        "y": 360,
-        "wires": []
-    },
-    {
         "id": "entry_room_countdown_info_01",
         "type": "function",
         "z": "entry_room_light_tab",
@@ -647,7 +630,6 @@
         "y": 600,
         "wires": [
             [
-                "debug_countdown_status_01",
                 "entry_room_countdown_display_editor"
             ]
         ]
