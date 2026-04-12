@@ -98,7 +98,6 @@
         "props": [
             {
                 "p": "topic",
-                "v": "udp_light_on",
                 "vt": "str"
             }
         ],
@@ -106,6 +105,7 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
+        "topic": "udp_light_on",
         "x": 135,
         "y": 220,
         "wires": [
@@ -692,5 +692,347 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "phidget_input_4",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT4",
+        "channel": 4,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 940,
+        "wires": [
+            [
+                "debug_input_4"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_4",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_5",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT5",
+        "channel": 5,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 980,
+        "wires": [
+            [
+                "debug_input_5"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_5",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_6",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT6",
+        "channel": 6,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1020,
+        "wires": [
+            [
+                "debug_input_6"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_6",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_7",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT7",
+        "channel": 7,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1060,
+        "wires": [
+            [
+                "debug_input_7"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_7",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_8",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT8",
+        "channel": 8,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1100,
+        "wires": [
+            [
+                "debug_input_8"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_8",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_9",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT9",
+        "channel": 9,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1140,
+        "wires": [
+            [
+                "debug_input_9"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_9",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1140,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_10",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT10",
+        "channel": 10,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1180,
+        "wires": [
+            [
+                "debug_input_10"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_10",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input10",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_11",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT11",
+        "channel": 11,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1220,
+        "wires": [
+            [
+                "debug_input_11"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_11",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input11",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "phidget_input_12",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT12",
+        "channel": 12,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 1260,
+        "wires": [
+            [
+                "debug_input_12"
+            ]
+        ]
+    },
+    {
+        "id": "debug_input_12",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1260,
+        "wires": []
     }
 ]
