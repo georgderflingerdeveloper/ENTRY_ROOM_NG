@@ -604,5 +604,119 @@
         "x": 870,
         "y": 880,
         "wires": []
+    },
+    {
+        "id": "8415cf6625a9a06f",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT3",
+        "channel": 0,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 880,
+        "wires": [
+            [
+                "f0a8c882d0095129"
+            ]
+        ]
+    },
+    {
+        "id": "7957226d8ed16580",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT2",
+        "channel": 0,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 840,
+        "wires": [
+            [
+                "f3e7d52ce64fa70f"
+            ]
+        ]
+    },
+    {
+        "id": "ae57bfc4f9aa8496",
+        "type": "phidget22-digitalinput",
+        "z": "entry_room_light_tab",
+        "name": "INPUT1",
+        "channel": 0,
+        "deviceSerialNumber": "311883",
+        "isHubPortDevice": false,
+        "hubPort": 0,
+        "debug": false,
+        "inputMode": 1,
+        "powerSupply": 1,
+        "openTimeout": "5000",
+        "x": 300,
+        "y": 800,
+        "wires": [
+            [
+                "d8e4f9288e867109"
+            ]
+        ]
+    },
+    {
+        "id": "d8e4f9288e867109",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "f3e7d52ce64fa70f",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "f0a8c882d0095129",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "debug_input3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 880,
+        "wires": []
     }
 ]
