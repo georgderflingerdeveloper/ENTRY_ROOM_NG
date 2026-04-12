@@ -225,12 +225,12 @@
         "wires": [
             [
                 "switch_boolean_to_numeric",
-                "debug_light_command"
-            ],
-            [
-                "debug_light_status",
+                "debug_light_command",
                 "toggle_node_3_channel",
                 "entry_room_countdown_info_01"
+            ],
+            [
+                "debug_light_status"
             ]
         ]
     },
