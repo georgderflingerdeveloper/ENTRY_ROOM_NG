@@ -43,9 +43,7 @@
         "x": 130,
         "y": 100,
         "wires": [
-            [
-                "function_light_logic"
-            ]
+            []
         ]
     },
     {
@@ -67,9 +65,7 @@
         "x": 130,
         "y": 140,
         "wires": [
-            [
-                "function_light_logic"
-            ]
+            []
         ]
     },
     {
@@ -91,9 +87,7 @@
         "x": 120,
         "y": 180,
         "wires": [
-            [
-                "function_light_logic"
-            ]
+            []
         ]
     },
     {
@@ -115,9 +109,7 @@
         "x": 135,
         "y": 220,
         "wires": [
-            [
-                "function_light_logic"
-            ]
+            []
         ]
     },
     {
@@ -139,9 +131,7 @@
         "x": 140,
         "y": 260,
         "wires": [
-            [
-                "function_light_logic"
-            ]
+            []
         ]
     },
     {
@@ -163,9 +153,7 @@
         "x": 135,
         "y": 300,
         "wires": [
-            [
-                "function_light_logic"
-            ]
+            []
         ]
     },
     {
@@ -183,8 +171,7 @@
         "y": 360,
         "wires": [
             [
-                "function_parse_udp",
-                "1b8241e07b65a1ce"
+                "function_parse_udp"
             ]
         ]
     },
@@ -200,37 +187,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 460,
-        "y": 440,
+        "x": 200,
+        "y": 520,
         "wires": [
             [
                 "toggle_node_3_channel"
-            ]
-        ]
-    },
-    {
-        "id": "function_light_logic",
-        "type": "function",
-        "z": "entry_room_light_tab",
-        "name": "Entry Room Light Logic",
-        "func": "// Configuration constants for the automatic light control timers.\n// PRESENCE_HOLD_TIME_MS: how long the light remains on after manual activation\n// when presence is detected continuously.\n// DELAYED_OFF_TIME_MS: delay before turning the light off after a long press.\nconst PRESENCE_HOLD_TIME_MS = 60 * 60 * 1000;\nconst DELAYED_OFF_TIME_MS = 5 * 60 * 1000;\n\nglobal.set('PRESENCE_HOLD_TIME_MS', 60 * 60 * 1000);\nglobal.set('DELAYED_OFF_TIME_MS', 5 * 60 * 1000);\n\n/**\n * Cancel and clear a timer stored in node context.\n * @param {string} timerName - The context key for the timer handle.\n */\nfunction clearStoredTimer(timerName) {\n    const activeTimer = context.get(timerName);\n    if (activeTimer) {\n        clearTimeout(activeTimer);\n        context.set(timerName, null);\n    }\n}\n\n/**\n * Update the light output state and publish both command and status messages.\n * @param {boolean} newLightState - New desired light state.\n * @param {string} reasonText - Reason text for the state change.\n */\nfunction publishLightState(newLightState, reasonText) {\n    context.set('xLightOutputActive', newLightState);\n\n    node.send([\n        {\n            topic: 'light_command',\n            payload: newLightState,\n            reason: reasonText\n        },\n        {\n            topic: 'light_status',\n            payload: {\n                xLightOutputActive: newLightState,\n                xDelayedOffModeActive: !!context.get('xDelayedOffModeActive'),\n                reason: reasonText\n            }\n        }\n    ]);\n}\n\n/**\n * Restart the presence hold timer.\n * When this timer expires, the light is switched off automatically\n * unless presence is detected again before expiration.\n */\nfunction restartPresenceHoldTimer() {\n    clearStoredTimer('presenceHoldTimerHandle');\n\n    const timerHandle = setTimeout(() => {\n        context.set('presenceHoldTimerHandle', null);\n        context.set('xDelayedOffModeActive', false);\n\n        if (context.get('xLightOutputActive')) {\n            publishLightState(false, 'presence_hold_time_elapsed');\n        }\n    }, PRESENCE_HOLD_TIME_MS);\n\n    context.set('presenceHoldTimerHandle', timerHandle);\n}\n\n/**\n * Start the delayed off timer that will turn the light off after a fixed delay.\n * This is typically triggered by a long press or long push event.\n */\nfunction startDelayedOffTimer() {\n    clearStoredTimer('presenceHoldTimerHandle');\n    clearStoredTimer('delayedOffTimerHandle');\n\n    context.set('xDelayedOffModeActive', true);\n\n    const timerHandle = setTimeout(() => {\n        context.set('delayedOffTimerHandle', null);\n        context.set('xDelayedOffModeActive', false);\n\n        if (context.get('xLightOutputActive')) {\n            publishLightState(false, 'delayed_off_time_elapsed');\n        }\n    }, DELAYED_OFF_TIME_MS);\n\n    context.set('delayedOffTimerHandle', timerHandle);\n}\n\n// Read the current light state from context once per message processing.\nconst xLightOutputActive = context.get('xLightOutputActive') || false;\n\nswitch (msg.topic) {\n    case 'button_short_press': {\n        // Short press toggles the light immediately.\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n\n        if (xLightOutputActive) {\n            // Turn light off immediately and clear the presence timer.\n            clearStoredTimer('presenceHoldTimerHandle');\n            publishLightState(false, 'short_press_toggle_off');\n        } else {\n            publishLightState(true, 'short_press_toggle_on');\n            restartPresenceHoldTimer();\n        }\n        return null;\n    }\n\n    case 'button_long_press': {\n        // Long press starts a delayed off timer if the light is currently on.\n        if (xLightOutputActive) {\n            startDelayedOffTimer();\n            return [null, { topic: 'light_status', payload: 'Long press detected -> OFF in 2 minutes' }];\n        }\n        return [null, { topic: 'light_status', payload: 'Long press ignored because light is already OFF' }];\n    }\n\n    case 'presence_detected': {\n        // Presence detection may restart the hold timer only when the light is already on.\n        if (context.get('xLightOutputActive')) {\n            if (context.get('xDelayedOffModeActive')) {\n                return [null, { topic: 'light_status', payload: 'Presence ignored because delayed OFF mode is active' }];\n            }\n            restartPresenceHoldTimer();\n            return [null, { topic: 'light_status', payload: 'Presence detected -> 30 minute timer restarted' }];\n        }\n        return [null, { topic: 'light_status', payload: 'Presence detected but light is OFF' }];\n    }\n\n    case 'udp_light_on': {\n        // External UDP command to force the light on.\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n\n        if (!context.get('xLightOutputActive')) {\n            publishLightState(true, 'udp_light_on');\n        } else {\n            node.send([null, { topic: 'light_status', payload: 'UDP LIGHT ON received, light already ON' }]);\n        }\n\n        restartPresenceHoldTimer();\n        return null;\n    }\n\n    case 'udp_light_off': {\n        // External UDP command to turn the light off immediately.\n        clearStoredTimer('presenceHoldTimerHandle');\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n\n        if (context.get('xLightOutputActive')) {\n            publishLightState(false, 'udp_light_off');\n        }\n\n        return [null, { topic: 'light_status', payload: 'UDP LIGHT OFF received' }];\n    }\n\n    case 'udp_all_off': {\n        // External UDP command to turn all lights off immediately.\n        clearStoredTimer('presenceHoldTimerHandle');\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n\n        if (context.get('xLightOutputActive')) {\n            publishLightState(false, 'udp_all_off');\n        }\n\n        return [null, { topic: 'light_status', payload: 'UDP ALL OFF received' }];\n    }\n\n    case 'udp_light_longpush': {\n        // External long push command starts the delayed off timer when ON.\n        if (context.get('xLightOutputActive')) {\n            startDelayedOffTimer();\n            return [null, { topic: 'light_status', payload: 'Long push detected -> OFF in 2 minutes' }];\n        }\n\n        return [null, { topic: 'light_status', payload: 'Long push ignored because light is already OFF' }];\n    }   \n\n    case 'status_message_only': {\n        // Status-only message, no state change needed.\n        return [null, { topic: 'light_status', payload: msg.payload }];\n    }\n}\n\nreturn [null, { topic: 'light_status', payload: 'Unknown topic: ' + msg.topic }];",
-        "outputs": 2,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "clearTimeout(context.get('presenceHoldTimerHandle')); clearTimeout(context.get('delayedOffTimerHandle'));",
-        "libs": [],
-        "x": 580,
-        "y": 220,
-        "wires": [
-            [
-                "switch_boolean_to_numeric",
-                "debug_light_command",
-                "toggle_node_3_channel",
-                "entry_room_countdown_info_01"
-            ],
-            [
-                "debug_light_status"
             ]
         ]
     },
@@ -252,7 +213,7 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 840,
+        "x": 900,
         "y": 180,
         "wires": [
             [
@@ -338,40 +299,6 @@
         "statusType": "auto",
         "x": 1410,
         "y": 200,
-        "wires": []
-    },
-    {
-        "id": "debug_light_command",
-        "type": "debug",
-        "z": "entry_room_light_tab",
-        "name": "Light Command",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": true,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "reason",
-        "statusType": "msg",
-        "x": 840,
-        "y": 120,
-        "wires": []
-    },
-    {
-        "id": "debug_light_status",
-        "type": "debug",
-        "z": "entry_room_light_tab",
-        "name": "Light Status",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": true,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "payload",
-        "statusType": "auto",
-        "x": 830,
-        "y": 280,
         "wires": []
     },
     {
@@ -499,23 +426,6 @@
         ]
     },
     {
-        "id": "1b8241e07b65a1ce",
-        "type": "debug",
-        "z": "entry_room_light_tab",
-        "name": "UDP Status",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": true,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "payload",
-        "statusType": "auto",
-        "x": 430,
-        "y": 360,
-        "wires": []
-    },
-    {
         "id": "toggle_node_3_channel",
         "type": "function",
         "z": "entry_room_light_tab",
@@ -527,30 +437,13 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 770,
-        "y": 460,
+        "x": 450,
+        "y": 440,
         "wires": [
             [
-                "function_light_logic",
-                "cec4cc352f9ac489"
+                "entry_room_light_logic_final"
             ]
         ]
-    },
-    {
-        "id": "cec4cc352f9ac489",
-        "type": "debug",
-        "z": "entry_room_light_tab",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1040,
-        "y": 540,
-        "wires": []
     },
     {
         "id": "f299c88db9c5ae1a",
@@ -722,26 +615,6 @@
         "wires": []
     },
     {
-        "id": "entry_room_countdown_info_01",
-        "type": "function",
-        "z": "entry_room_light_tab",
-        "name": "Entry Room Countdown Info",
-        "func": "// Countdown info node for entry room light logic\n// Connect this node to the outputs of the main light logic.\n//\n// Expected inputs from main logic:\n// - topic: light_command, payload: boolean, reason: string\n// - topic: light_status, payload: object or string\n//\n// Output:\n// - topic: countdown_status\n// - payload: {\n//     active: true/false,\n//     mode: 'presence_hold' | 'delayed_off' | 'idle',\n//     remaining_sec: number,\n//     remaining_text: string,\n//     reason: string\n//   }\n\nconst PRESENCE_HOLD_TIME_MS = global.get('PRESENCE_HOLD_TIME_MS') || (60 * 60 * 1000);\nconst DELAYED_OFF_TIME_MS = global.get('DELAYED_OFF_TIME_MS') || (5 * 60 * 1000);\n\nfunction formatRemainingText(totalSec) {\n    const min = Math.floor(totalSec / 60);\n    const sec = totalSec % 60;\n    return String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');\n}\n\nfunction clearTicker() {\n    const handle = context.get('tickerHandle');\n    if (handle) {\n        clearInterval(handle);\n    }\n\n    context.set('tickerHandle', null);\n    context.set('countdownMode', 'idle');\n    context.set('countdownEndTime', 0);\n}\n\nfunction emitCountdown(reasonText) {\n    const mode = context.get('countdownMode') || 'idle';\n    const endTime = context.get('countdownEndTime') || 0;\n\n    if (mode === 'idle' || endTime <= 0) {\n        node.send({\n            topic: 'countdown_status',\n            payload: {\n                active: false,\n                mode: 'idle',\n                remaining_sec: 0,\n                remaining_text: '00:00',\n                reason: reasonText\n            }\n        });\n        return;\n    }\n\n    const remainingMs = Math.max(0, endTime - Date.now());\n    const remainingSec = Math.ceil(remainingMs / 1000);\n\n    node.send({\n        topic: 'countdown_status',\n        payload: {\n            active: remainingSec > 0,\n            mode: mode,\n            remaining_sec: remainingSec,\n            remaining_text: formatRemainingText(remainingSec),\n            reason: reasonText\n        }\n    });\n}\n\nfunction startCountdown(mode, durationMs, reasonText) {\n    clearTicker();\n\n    const endTime = Date.now() + durationMs;\n\n    context.set('countdownMode', mode);\n    context.set('countdownEndTime', endTime);\n\n    emitCountdown(reasonText);\n\n    const handle = setInterval(function () {\n        const currentMode = context.get('countdownMode') || 'idle';\n        const currentEndTime = context.get('countdownEndTime') || 0;\n\n        if (currentMode === 'idle' || currentEndTime <= 0) {\n            clearTicker();\n            return;\n        }\n\n        const remainingMs = currentEndTime - Date.now();\n\n        if (remainingMs <= 0) {\n            emitCountdown('countdown_elapsed');\n            clearTicker();\n            return;\n        }\n\n        emitCountdown('countdown_tick');\n    }, 1000);\n\n    context.set('tickerHandle', handle);\n}\n\nfunction stopCountdown(reasonText) {\n    clearTicker();\n    emitCountdown(reasonText);\n}\n\nfunction extractReason(msg) {\n    if (msg && typeof msg.reason === 'string') {\n        return msg.reason;\n    }\n\n    if (msg && msg.payload && typeof msg.payload.reason === 'string') {\n        return msg.payload.reason;\n    }\n\n    if (msg && typeof msg.payload === 'string') {\n        return msg.payload;\n    }\n\n    return '';\n}\n\nconst reason = extractReason(msg);\n\nif (msg.topic === 'light_command') {\n    if (msg.payload === true) {\n        startCountdown('presence_hold', PRESENCE_HOLD_TIME_MS, reason || 'light_on');\n        return null;\n    }\n\n    if (msg.payload === false) {\n        stopCountdown(reason || 'light_off');\n        return null;\n    }\n\n    return null;\n}\n\nif (msg.topic === 'light_status') {\n    if (\n        reason === 'presence_detected' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('Presence detected -> 30 minute timer restarted') >= 0)\n    ) {\n        startCountdown('presence_hold', PRESENCE_HOLD_TIME_MS, 'presence_restart');\n        return null;\n    }\n\n    if (\n        reason === 'udp_light_longpush' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('Long push detected') >= 0)\n    ) {\n        startCountdown('delayed_off', DELAYED_OFF_TIME_MS, 'delayed_off_started');\n        return null;\n    }\n\n    if (\n        reason === 'delayed_off_time_elapsed' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('delayed_off_time_elapsed') >= 0)\n    ) {\n        stopCountdown('delayed_off_elapsed');\n        return null;\n    }\n\n    if (\n        reason === 'presence_hold_time_elapsed' ||\n        (typeof msg.payload === 'string' && msg.payload.indexOf('presence_hold_time_elapsed') >= 0)\n    ) {\n        stopCountdown('presence_hold_elapsed');\n        return null;\n    }\n\n    if (\n        msg.payload &&\n        typeof msg.payload === 'object' &&\n        msg.payload.xLightOutputActive === false\n    ) {\n        stopCountdown(reason || 'light_off_status');\n        return null;\n    }\n\n    return null;\n}\n\nreturn null;",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "const handle = context.get('tickerHandle');\nif (handle) {\n    clearInterval(handle);\n}\ncontext.set('tickerHandle', null);\ncontext.set('countdownMode', 'idle');\ncontext.set('countdownEndTime', 0);",
-        "libs": [],
-        "x": 900,
-        "y": 340,
-        "wires": [
-            [
-                "debug_countdown_status_01"
-            ]
-        ]
-    },
-    {
         "id": "debug_countdown_status_01",
         "type": "debug",
         "z": "entry_room_light_tab",
@@ -757,5 +630,48 @@
         "x": 1190,
         "y": 360,
         "wires": []
+    },
+    {
+        "id": "entry_room_countdown_info_01",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "Entry Room Countdown Info",
+        "func": "// Entry Room Countdown Info\n// ------------------------------------------------------------\n// This node must be connected to the outputs of the main light logic.\n// It does not calculate its own timer durations.\n// Instead, it reads the real end times from flow context.\n//\n// Required flow context values written by the main logic:\n//   flow.set('entryRoom_presenceEndTime', <timestamp_ms>)\n//   flow.set('entryRoom_delayedOffEndTime', <timestamp_ms>)\n//\n// Output:\n//   msg.topic = 'countdown_status'\n//   msg.payload = {\n//       active: true/false,\n//       mode: 'idle' | 'presence_hold' | 'delayed_off',\n//       remaining_sec: number,\n//       remaining_text: string,\n//       end_time: number,\n//       reason: string\n//   }\n\nfunction formatRemainingText(totalSec) {\n    const min = Math.floor(totalSec / 60);\n    const sec = totalSec % 60;\n    return String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');\n}\n\nfunction getPresenceEndTime() {\n    return flow.get('entryRoom_presenceEndTime') || 0;\n}\n\nfunction getDelayedOffEndTime() {\n    return flow.get('entryRoom_delayedOffEndTime') || 0;\n}\n\nfunction clearTicker() {\n    const handle = context.get('tickerHandle');\n    if (handle) {\n        clearInterval(handle);\n    }\n    context.set('tickerHandle', null);\n}\n\nfunction getCurrentCountdownState() {\n    const now = Date.now();\n    const delayedEndTime = getDelayedOffEndTime();\n    const presenceEndTime = getPresenceEndTime();\n\n    if (delayedEndTime > now) {\n        return {\n            active: true,\n            mode: 'delayed_off',\n            endTime: delayedEndTime\n        };\n    }\n\n    if (presenceEndTime > now) {\n        return {\n            active: true,\n            mode: 'presence_hold',\n            endTime: presenceEndTime\n        };\n    }\n\n    return {\n        active: false,\n        mode: 'idle',\n        endTime: 0\n    };\n}\n\nfunction emitCountdown(reasonText) {\n    const state = getCurrentCountdownState();\n\n    if (!state.active) {\n        node.send({\n            topic: 'countdown_status',\n            payload: {\n                active: false,\n                mode: 'idle',\n                remaining_sec: 0,\n                remaining_text: '00:00',\n                end_time: 0,\n                reason: reasonText\n            }\n        });\n        return;\n    }\n\n    const remainingMs = Math.max(0, state.endTime - Date.now());\n    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));\n\n    node.send({\n        topic: 'countdown_status',\n        payload: {\n            active: remainingSec > 0,\n            mode: state.mode,\n            remaining_sec: remainingSec,\n            remaining_text: formatRemainingText(remainingSec),\n            end_time: state.endTime,\n            reason: reasonText\n        }\n    });\n}\n\nfunction startTicker() {\n    if (context.get('tickerHandle')) {\n        return;\n    }\n\n    const handle = setInterval(function () {\n        const state = getCurrentCountdownState();\n\n        if (!state.active) {\n            clearTicker();\n            emitCountdown('countdown_stopped');\n            return;\n        }\n\n        emitCountdown('countdown_tick');\n    }, 1000);\n\n    context.set('tickerHandle', handle);\n}\n\nfunction refreshTicker(reasonText) {\n    const state = getCurrentCountdownState();\n\n    if (state.active) {\n        emitCountdown(reasonText);\n        startTicker();\n    } else {\n        clearTicker();\n        emitCountdown(reasonText);\n    }\n}\n\nfunction extractReason(msg) {\n    if (typeof msg.reason === 'string' && msg.reason.length > 0) {\n        return msg.reason;\n    }\n\n    if (msg.payload && typeof msg.payload === 'object' && typeof msg.payload.reason === 'string') {\n        return msg.payload.reason;\n    }\n\n    if (typeof msg.payload === 'string') {\n        return msg.payload;\n    }\n\n    return '';\n}\n\nconst reason = extractReason(msg);\n\nif (msg.topic === 'light_command') {\n    refreshTicker(reason || 'light_command_update');\n    return null;\n}\n\nif (msg.topic === 'light_status') {\n    refreshTicker(reason || 'light_status_update');\n    return null;\n}\n\nif (msg.topic === 'countdown_refresh') {\n    refreshTicker(reason || 'manual_refresh');\n    return null;\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "const handle = context.get('tickerHandle');\nif (handle) {\n    clearInterval(handle);\n}\ncontext.set('tickerHandle', null);",
+        "libs": [],
+        "x": 1060,
+        "y": 600,
+        "wires": [
+            [
+                "debug_countdown_status_01"
+            ]
+        ]
+    },
+    {
+        "id": "entry_room_light_logic_final",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "Entry Room Light Logic V2",
+        "func": "// ============================================================\n// ENTRY ROOM LIGHT LOGIC - FINAL CLEAN VERSION\n// ============================================================\n\nconst PRESENCE_HOLD_TIME_MS = global.get('PRESENCE_HOLD_TIME_MS') || (60 * 60 * 1000);\nconst DELAYED_OFF_TIME_MS = global.get('DELAYED_OFF_TIME_MS') || (5 * 60 * 1000);\n\nfunction clearStoredTimer(name) {\n    const t = context.get(name);\n    if (t) {\n        clearTimeout(t);\n        context.set(name, null);\n    }\n}\n\nfunction clearFlowTimes() {\n    flow.set('entryRoom_presenceEndTime', 0);\n    flow.set('entryRoom_delayedOffEndTime', 0);\n}\n\nfunction publishLightState(state, reason) {\n    context.set('xLightOutputActive', state);\n\n    if (!state) {\n        context.set('xDelayedOffModeActive', false);\n        clearFlowTimes();\n    }\n\n    node.send([\n        {\n            topic: 'light_command',\n            payload: state,\n            reason: reason\n        },\n        {\n            topic: 'light_status',\n            payload: {\n                xLightOutputActive: state,\n                xDelayedOffModeActive: !!context.get('xDelayedOffModeActive'),\n                presenceEndTime: flow.get('entryRoom_presenceEndTime') || 0,\n                delayedOffEndTime: flow.get('entryRoom_delayedOffEndTime') || 0,\n                reason: reason\n            }\n        }\n    ]);\n}\n\nfunction restartPresenceHoldTimer() {\n    clearStoredTimer('presenceHoldTimerHandle');\n\n    const endTime = Date.now() + PRESENCE_HOLD_TIME_MS;\n    flow.set('entryRoom_presenceEndTime', endTime);\n    flow.set('entryRoom_delayedOffEndTime', 0);\n\n    const handle = setTimeout(() => {\n        context.set('presenceHoldTimerHandle', null);\n        flow.set('entryRoom_presenceEndTime', 0);\n\n        if (context.get('xLightOutputActive')) {\n            publishLightState(false, 'presence_hold_time_elapsed');\n        }\n    }, PRESENCE_HOLD_TIME_MS);\n\n    context.set('presenceHoldTimerHandle', handle);\n}\n\nfunction startDelayedOffTimer() {\n    clearStoredTimer('presenceHoldTimerHandle');\n    clearStoredTimer('delayedOffTimerHandle');\n\n    context.set('xDelayedOffModeActive', true);\n\n    const endTime = Date.now() + DELAYED_OFF_TIME_MS;\n    flow.set('entryRoom_presenceEndTime', 0);\n    flow.set('entryRoom_delayedOffEndTime', endTime);\n\n    const handle = setTimeout(() => {\n        context.set('delayedOffTimerHandle', null);\n        context.set('xDelayedOffModeActive', false);\n        flow.set('entryRoom_delayedOffEndTime', 0);\n\n        if (context.get('xLightOutputActive')) {\n            publishLightState(false, 'delayed_off_time_elapsed');\n        }\n    }, DELAYED_OFF_TIME_MS);\n\n    context.set('delayedOffTimerHandle', handle);\n}\n\nfunction status(reason) {\n    return [\n        null,\n        {\n            topic: 'light_status',\n            payload: {\n                xLightOutputActive: !!context.get('xLightOutputActive'),\n                xDelayedOffModeActive: !!context.get('xDelayedOffModeActive'),\n                presenceEndTime: flow.get('entryRoom_presenceEndTime') || 0,\n                delayedOffEndTime: flow.get('entryRoom_delayedOffEndTime') || 0,\n                reason: reason\n            }\n        }\n    ];\n}\n\nconst isOn = context.get('xLightOutputActive') || false;\n\nswitch (msg.topic) {\n\n    case 'udp_light_on': {\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n        flow.set('entryRoom_delayedOffEndTime', 0);\n\n        if (!isOn) {\n            publishLightState(true, 'udp_light_on');\n        }\n\n        restartPresenceHoldTimer();\n        return null;\n    }\n\n    case 'udp_light_off': {\n        clearStoredTimer('presenceHoldTimerHandle');\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n        clearFlowTimes();\n\n        if (isOn) {\n            publishLightState(false, 'udp_light_off');\n        }\n\n        return status('udp_light_off');\n    }\n\n    case 'udp_all_off': {\n        clearStoredTimer('presenceHoldTimerHandle');\n        clearStoredTimer('delayedOffTimerHandle');\n        context.set('xDelayedOffModeActive', false);\n        clearFlowTimes();\n\n        if (isOn) {\n            publishLightState(false, 'udp_all_off');\n        }\n\n        return status('udp_all_off');\n    }\n\n    case 'udp_light_longpush': {\n        if (isOn) {\n            startDelayedOffTimer();\n            return status('udp_light_longpush');\n        }\n\n        return status('udp_light_longpush_ignored');\n    }\n\n    case 'presence_detected': {\n        if (isOn && !context.get('xDelayedOffModeActive')) {\n            restartPresenceHoldTimer();\n            return status('presence_detected');\n        }\n\n        return status('presence_ignored');\n    }\n\n    default:\n        return status('unknown_' + msg.topic);\n}\n",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "const p = context.get('presenceHoldTimerHandle');\nif (p) clearTimeout(p);\nconst d = context.get('delayedOffTimerHandle');\nif (d) clearTimeout(d);\nflow.set('entryRoom_presenceEndTime', 0);\nflow.set('entryRoom_delayedOffEndTime', 0);",
+        "libs": [],
+        "x": 780,
+        "y": 520,
+        "wires": [
+            [
+                "toggle_node_3_channel",
+                "entry_room_countdown_info_01",
+                "switch_boolean_to_numeric"
+            ],
+            []
+        ]
     }
 ]
