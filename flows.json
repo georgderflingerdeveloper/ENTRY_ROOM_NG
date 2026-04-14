@@ -458,11 +458,12 @@
         "inputMode": 1,
         "powerSupply": 1,
         "openTimeout": "5000",
-        "x": 480,
-        "y": 160,
+        "x": 240,
+        "y": 780,
         "wires": [
             [
-                "b9ec817da9d1d69d"
+                "b9ec817da9d1d69d",
+                "a8f3c4d9e2715b10"
             ]
         ]
     },
@@ -479,8 +480,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 800,
-        "y": 80,
+        "x": 600,
+        "y": 720,
         "wires": []
     },
     {
@@ -1053,6 +1054,43 @@
         "complete": "payload",
         "x": 1140,
         "y": 420,
+        "wires": []
+    },
+    {
+        "id": "a8f3c4d9e2715b10",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "Button Event Detector",
+        "func": "// --- CONFIG ---\nconst SHORT_MAX = 1000;        // shortpush < 1s\nconst LONG_MIN = 2500;         // longpush > 2.5s\nconst ULTRA_LONG_MIN = 5000;   // ultralongpush >= 5s\nconst DOUBLE_MAX_GAP = 2000;   // second short must arrive within 2s\n\n// --- HELPERS ---\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\n// --- STATE ---\nlet pressStart = context.get('pressStart') || 0;\nlet shortTimer = context.get('shortTimer') || null;\nlet pendingShort = context.get('pendingShort') || false;\n\nconst now = Date.now();\nconst state = msg.payload && typeof msg.payload === 'object' ? msg.payload.state : undefined;\n\n// --- INVALID INPUT ---\nif (typeof state !== 'boolean') {\n    setStatus('grey', 'ring', 'invalid input');\n    return null;\n}\n\n// --- BUTTON DOWN ---\nif (state === true) {\n    pressStart = now;\n    context.set('pressStart', pressStart);\n    setStatus('grey', 'dot', 'pressed');\n    return null;\n}\n\n// --- BUTTON UP ---\nif (state === false && pressStart > 0) {\n    const duration = now - pressStart;\n\n    context.set('pressStart', 0);\n\n    // --- ULTRA LONG ---\n    if (duration >= ULTRA_LONG_MIN) {\n        if (shortTimer) {\n            clearTimeout(shortTimer);\n            context.set('shortTimer', null);\n        }\n        context.set('pendingShort', false);\n\n        setStatus('red', 'dot', `ultra ${duration}ms`);\n        return {\n            topic: 'button_right_entry_ultralongpush',\n            payload: {\n                duration_ms: duration,\n                event: 'ultralongpush'\n            }\n        };\n    }\n\n    // --- LONG ---\n    if (duration > LONG_MIN) {\n        if (shortTimer) {\n            clearTimeout(shortTimer);\n            context.set('shortTimer', null);\n        }\n        context.set('pendingShort', false);\n\n        setStatus('blue', 'dot', `long ${duration}ms`);\n        return {\n            topic: 'button_right_entry_longpush',\n            payload: {\n                duration_ms: duration,\n                event: 'longpush'\n            }\n        };\n    }\n\n    // --- SHORT CANDIDATE ---\n    if (duration < SHORT_MAX) {\n        // second short inside double window -> doublepush\n        if (pendingShort) {\n            if (shortTimer) {\n                clearTimeout(shortTimer);\n                context.set('shortTimer', null);\n            }\n            context.set('pendingShort', false);\n\n            setStatus('green', 'dot', 'double');\n            return {\n                topic: 'button_right_entry_doublepush',\n                payload: {\n                    duration_ms: duration,\n                    event: 'doublepush'\n                }\n            };\n        }\n\n        // first short -> wait for second press\n        context.set('pendingShort', true);\n\n        shortTimer = setTimeout(() => {\n            context.set('shortTimer', null);\n\n            if (context.get('pendingShort')) {\n                context.set('pendingShort', false);\n                setStatus('green', 'dot', 'short');\n\n                node.send({\n                    topic: 'button_right_entry_shortpush',\n                    payload: {\n                        duration_ms: duration,\n                        event: 'shortpush'\n                    }\n                });\n            }\n        }, DOUBLE_MAX_GAP);\n\n        context.set('shortTimer', shortTimer);\n        setStatus('yellow', 'ring', 'wait 2nd');\n        return null;\n    }\n\n    // --- BETWEEN SHORT AND LONG -> ignore ---\n    setStatus('grey', 'ring', `ignored ${duration}ms`);\n    return null;\n}\n\n// --- DEFAULT ---\nsetStatus('green', 'ring', 'idle');\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'green', shape: 'ring', text: 'idle' });",
+        "finalize": "const shortTimer = context.get('shortTimer');\nif (shortTimer) {\n    clearTimeout(shortTimer);\n    context.set('shortTimer', null);\n}\ncontext.set('pressStart', 0);\ncontext.set('pendingShort', false);\nnode.status({});",
+        "libs": [],
+        "x": 680,
+        "y": 780,
+        "wires": [
+            [
+                "debug_button_events"
+            ]
+        ]
+    },
+    {
+        "id": "debug_button_events",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "DEBUG Button Events",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 780,
         "wires": []
     }
 ]
