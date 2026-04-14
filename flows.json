@@ -567,7 +567,7 @@
         "id": "d8e4f9288e867109",
         "type": "debug",
         "z": "entry_room_light_tab",
-        "name": "debug_input1",
+        "name": "debug_input1_PRESENCE_DETECTOR",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -576,7 +576,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 480,
+        "x": 560,
         "y": 800,
         "wires": []
     },
