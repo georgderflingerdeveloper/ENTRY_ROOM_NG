@@ -626,8 +626,8 @@
         "initialize": "",
         "finalize": "const handle = context.get('tickerHandle');\nif (handle) {\n    clearInterval(handle);\n}\ncontext.set('tickerHandle', null);",
         "libs": [],
-        "x": 1060,
-        "y": 600,
+        "x": 1080,
+        "y": 520,
         "wires": [
             [
                 "entry_room_countdown_display_editor"
@@ -669,8 +669,8 @@
         "initialize": "",
         "finalize": "node.status({});",
         "libs": [],
-        "x": 1200,
-        "y": 680,
+        "x": 1360,
+        "y": 520,
         "wires": [
             []
         ]
