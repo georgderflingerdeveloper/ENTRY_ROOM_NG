@@ -1092,5 +1092,71 @@
         "x": 960,
         "y": 780,
         "wires": []
+    },
+    {
+        "id": "40bf793e62bf40df",
+        "type": "udp out",
+        "z": "entry_room_light_tab",
+        "name": "BROADCAST",
+        "addr": "192.168.0.255",
+        "iface": "",
+        "port": "10000",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "false",
+        "x": 1120,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "b5fb2adb42f0a349",
+        "type": "inject",
+        "z": "entry_room_light_tab",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "TURN-ALL-LIGHTS-ON",
+        "payloadType": "str",
+        "x": 920,
+        "y": 860,
+        "wires": [
+            [
+                "40bf793e62bf40df"
+            ]
+        ]
+    },
+    {
+        "id": "1801e78bc74c8674",
+        "type": "inject",
+        "z": "entry_room_light_tab",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "TURN-ALL-LIGHTS-OFF",
+        "payloadType": "str",
+        "x": 890,
+        "y": 940,
+        "wires": [
+            [
+                "40bf793e62bf40df"
+            ]
+        ]
     }
 ]
