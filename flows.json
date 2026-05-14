@@ -1104,7 +1104,7 @@
         "ipv": "udp4",
         "outport": "",
         "base64": false,
-        "multicast": "false",
+        "multicast": "broad",
         "x": 1120,
         "y": 900,
         "wires": []
