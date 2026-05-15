@@ -1035,7 +1035,8 @@
         "y": 420,
         "wires": [
             [
-                "entry_room_light_logic_final"
+                "entry_room_light_logic_final",
+                "debug_presence_seq"
             ],
             [
                 "debug_presence_seq"
