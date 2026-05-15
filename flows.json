@@ -1076,7 +1076,8 @@
         "y": 780,
         "wires": [
             [
-                "debug_button_events"
+                "debug_button_events",
+                "entry_room_light_off_timer"
             ]
         ]
     },
@@ -1161,6 +1162,24 @@
             [
                 "40bf793e62bf40df"
             ]
+        ]
+    },
+    {
+        "id": "entry_room_light_off_timer",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "All Lights OFF Timer Control",
+        "func": "// --------------------------------------------------\n// ALL LIGHTS TIMER CONTROL\n// --------------------------------------------------\n// doublepush     -> start 5 min timer\n// shortpush      -> TURN-ALL-LIGHTS-ON\n// longpush       -> TURN-ALL-LIGHTS-OFF\n// any other push -> cancel running timer\n// --------------------------------------------------\n\nconst OFF_DELAY_MS = 5 * 60 * 1000;\n\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\nlet topic = msg.topic || '';\nlet timer = context.get('offTimer');\n\n// DOUBLE PUSH -> START TIMER\nif (topic === 'button_right_entry_doublepush') {\n\n    if (timer) {\n        clearTimeout(timer);\n    }\n\n    setStatus('yellow', 'dot', 'OFF in 5 min');\n\n    timer = setTimeout(() => {\n\n        context.set('offTimer', null);\n\n        node.status({\n            fill: 'red',\n            shape: 'dot',\n            text: 'ALL OFF'\n        });\n\n        node.send({\n            topic: 'TURN-ALL-LIGHTS-OFF',\n            payload: true\n        });\n\n    }, OFF_DELAY_MS);\n\n    context.set('offTimer', timer);\n\n    return {\n        topic: 'debug_timer',\n        payload: {\n            action: 'timer_started',\n            delay_ms: OFF_DELAY_MS,\n            ts: Date.now()\n        }\n    };\n}\n\n// SHORT PUSH -> ALL LIGHTS ON\nif (topic === 'button_right_entry_shortpush') {\n\n    if (timer) {\n        clearTimeout(timer);\n        context.set('offTimer', null);\n    }\n\n    setStatus('green', 'dot', 'ALL ON');\n\n    return {\n        topic: 'TURN-ALL-LIGHTS-ON',\n        payload: true\n    };\n}\n\n// LONG PUSH -> ALL LIGHTS OFF\nif (topic === 'button_right_entry_longpush') {\n\n    if (timer) {\n        clearTimeout(timer);\n        context.set('offTimer', null);\n    }\n\n    setStatus('red', 'dot', 'ALL OFF');\n\n    return {\n        topic: 'TURN-ALL-LIGHTS-OFF',\n        payload: true\n    };\n}\n\n// ANY OTHER BUTTON EVENT -> CANCEL TIMER\nif (topic.startsWith('button_right_entry_')) {\n\n    if (timer) {\n        clearTimeout(timer);\n        context.set('offTimer', null);\n\n        setStatus('grey', 'ring', 'timer cancelled');\n\n        return {\n            topic: 'debug_timer',\n            payload: {\n                action: 'timer_cancelled',\n                reason: topic,\n                ts: Date.now()\n            }\n        };\n    }\n}\n\nsetStatus('green', 'ring', 'idle');\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'green', shape: 'ring', text: 'idle' });",
+        "finalize": "const timer = context.get('offTimer');\nif (timer) {\n    clearTimeout(timer);\n    context.set('offTimer', null);\n}\nnode.status({});",
+        "libs": [],
+        "x": 1080,
+        "y": 700,
+        "wires": [
+            []
         ]
     }
 ]
