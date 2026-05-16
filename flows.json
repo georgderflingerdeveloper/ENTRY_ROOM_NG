@@ -191,7 +191,8 @@
         "y": 520,
         "wires": [
             [
-                "toggle_node_3_channel"
+                "toggle_node_3_channel",
+                "ae017495d68e6ddd"
             ]
         ]
     },
@@ -1184,5 +1185,22 @@
                 "function_parse_udp"
             ]
         ]
+    },
+    {
+        "id": "ae017495d68e6ddd",
+        "type": "debug",
+        "z": "entry_room_light_tab",
+        "name": "UDP_PARSER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 540,
+        "wires": []
     }
 ]
