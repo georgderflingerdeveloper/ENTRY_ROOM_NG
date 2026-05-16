@@ -180,7 +180,7 @@
         "type": "function",
         "z": "entry_room_light_tab",
         "name": "Parse UDP Command",
-        "func": "let udpText = (msg.payload || '').toString().trim();\n\n// nur Channel 3 auswerten!\nif (udpText.includes('_3_True')) {\n    return { topic: 'udp_light_on', payload: true };\n}\n\nif (udpText.includes('_3_False')) {\n    return { topic: 'udp_light_off', payload: false };\n}\n\n// ALLES andere ignorieren\nreturn null;\n\n",
+        "func": "let udpText = (msg.payload || '').toString().trim();\n\n// --------------------------------------------------\n// CHANNEL 3 LIGHT\n// --------------------------------------------------\n\nif (udpText.includes('_3_True')) {\n    return {\n        topic: 'udp_light_on',\n        payload: true\n    };\n}\n\nif (udpText.includes('_3_False')) {\n    return {\n        topic: 'udp_light_off',\n        payload: false\n    };\n}\n\n// --------------------------------------------------\n// ALL LIGHTS ON\n// --------------------------------------------------\n\nif (udpText.includes('TURN-ALL-LIGHTS-ON')) {\n    return {\n        topic: 'TURN-ALL-LIGHTS-ON',\n        payload: true\n    };\n}\n\n// --------------------------------------------------\n// ALL LIGHTS OFF\n// --------------------------------------------------\n\nif (udpText.includes('TURN-ALL-LIGHTS-OFF')) {\n    return {\n        topic: 'TURN-ALL-LIGHTS-OFF',\n        payload: true\n    };\n}\n\n// --------------------------------------------------\n// IGNORE EVERYTHING ELSE\n// --------------------------------------------------\n\nreturn null;\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
