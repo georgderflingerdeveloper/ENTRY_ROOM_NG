@@ -1007,7 +1007,7 @@
         "type": "debug",
         "z": "entry_room_light_tab",
         "name": "debug_input12",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
