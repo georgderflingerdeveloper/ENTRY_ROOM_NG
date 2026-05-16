@@ -1180,7 +1180,8 @@
         "y": 700,
         "wires": [
             [
-                "40bf793e62bf40df"
+                "40bf793e62bf40df",
+                "function_parse_udp"
             ]
         ]
     }
