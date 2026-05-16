@@ -1087,7 +1087,7 @@
         "type": "debug",
         "z": "entry_room_light_tab",
         "name": "DEBUG Button Events",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
