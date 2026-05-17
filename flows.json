@@ -15,12 +15,150 @@
         "env": []
     },
     {
+        "id": "4a53066011ea704c",
+        "type": "subflow",
+        "name": "Subflow 1",
+        "info": "",
+        "in": [
+            {
+                "x": 60,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "switch_boolean_to_numeric"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 600,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "change_output_on",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 600,
+                "y": 260,
+                "wires": [
+                    {
+                        "id": "change_output_off",
+                        "port": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "158f74129c903276",
+        "type": "group",
+        "z": "entry_room_light_tab",
+        "name": "SWITCHERS",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "9622d7548e14fb0d"
+        ],
+        "x": 1074,
+        "y": 159,
+        "w": 272,
+        "h": 82
+    },
+    {
+        "id": "switch_boolean_to_numeric",
+        "type": "switch",
+        "z": "4a53066011ea704c",
+        "name": "Boolean To Numeric Output",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 260,
+        "y": 160,
+        "wires": [
+            [
+                "change_output_on"
+            ],
+            [
+                "change_output_off"
+            ]
+        ]
+    },
+    {
+        "id": "change_output_off",
+        "type": "change",
+        "z": "4a53066011ea704c",
+        "name": "Light OFF -> 0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "setDutyCycle",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"dutyCycle\":0}",
+                "tot": "json"
+            }
+        ],
+        "x": 440,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "change_output_on",
+        "type": "change",
+        "z": "4a53066011ea704c",
+        "name": "Light ON -> 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "setDutyCycle",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"dutyCycle\":1}",
+                "tot": "json"
+            }
+        ],
+        "x": 440,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "comment_overview",
         "type": "comment",
         "z": "entry_room_light_tab",
         "name": "Entry room light control",
         "info": "Short button press toggles light\nLong button press schedules OFF in 2 minutes\nPresence restarts 30 minute timer\nUDP commands: LIGHT ON, LIGHT OFF, ALL OFF, PRESENCE",
-        "x": 640,
+        "x": 840,
         "y": 40,
         "wires": []
     },
@@ -180,7 +318,7 @@
         "type": "function",
         "z": "entry_room_light_tab",
         "name": "Parse UDP Command",
-        "func": "let udpText = (msg.payload || '').toString().trim();\n\n// --------------------------------------------------\n// CHANNEL 3 LIGHT\n// --------------------------------------------------\n\nif (udpText.includes('_3_True')) {\n    return {\n        topic: 'udp_light_on',\n        payload: true\n    };\n}\n\nif (udpText.includes('_3_False')) {\n    return {\n        topic: 'udp_light_off',\n        payload: false\n    };\n}\n\n// --------------------------------------------------\n// ALL LIGHTS ON\n// --------------------------------------------------\n\nif (udpText.includes('TURN-ALL-LIGHTS-ON')) {\n    return {\n        topic: 'TURN-ALL-LIGHTS-ON',\n        payload: true\n    };\n}\n\n// --------------------------------------------------\n// ALL LIGHTS OFF\n// --------------------------------------------------\n\nif (udpText.includes('TURN-ALL-LIGHTS-OFF')) {\n    return {\n        topic: 'TURN-ALL-LIGHTS-OFF',\n        payload: false\n    };\n}\n\n// --------------------------------------------------\n// IGNORE EVERYTHING ELSE\n// --------------------------------------------------\n\nreturn null;\n",
+        "func": "let udpText = (msg.payload || '').toString().trim();\n\n// --------------------------------------------------\n// CHANNEL 3 LIGHT\n// --------------------------------------------------\n\nif (udpText.includes('_3_True')) {\n    return {\n        topic: 'udp_light_on',\n        payload: true\n    };\n}\n\nif (udpText.includes('_3_False')) {\n    return {\n        topic: 'udp_light_off',\n        payload: false\n    };\n}\n\n// --------------------------------------------------\n// ALL LIGHTS ON\n// --------------------------------------------------\n\nif (udpText.includes('TURN-ALL-LIGHTS-ON')) {\n    return {\n        topic: 'udp_light_on',\n        payload: true\n    };\n}\n\n// --------------------------------------------------\n// ALL LIGHTS OFF\n// --------------------------------------------------\n\nif (udpText.includes('TURN-ALL-LIGHTS-OFF')) {\n    return {\n        topic: 'udp_light_off',\n        payload: false\n    };\n}\n\n// --------------------------------------------------\n// IGNORE EVERYTHING ELSE\n// --------------------------------------------------\n\nreturn null;\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -197,95 +335,6 @@
         ]
     },
     {
-        "id": "switch_boolean_to_numeric",
-        "type": "switch",
-        "z": "entry_room_light_tab",
-        "name": "Boolean To Numeric Output",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "true"
-            },
-            {
-                "t": "false"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 900,
-        "y": 180,
-        "wires": [
-            [
-                "change_output_on"
-            ],
-            [
-                "change_output_off"
-            ]
-        ]
-    },
-    {
-        "id": "change_output_on",
-        "type": "change",
-        "z": "entry_room_light_tab",
-        "name": "Light ON -> 1",
-        "rules": [
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "setDutyCycle",
-                "tot": "str"
-            },
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "{\"dutyCycle\":1}",
-                "tot": "json"
-            }
-        ],
-        "x": 1080,
-        "y": 100,
-        "wires": [
-            [
-                "debug_real_output",
-                "e7373a8944a85d35"
-            ]
-        ]
-    },
-    {
-        "id": "change_output_off",
-        "type": "change",
-        "z": "entry_room_light_tab",
-        "name": "Light OFF -> 0",
-        "rules": [
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "setDutyCycle",
-                "tot": "str"
-            },
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "{\"dutyCycle\":0}",
-                "tot": "json"
-            }
-        ],
-        "x": 1080,
-        "y": 280,
-        "wires": [
-            [
-                "debug_real_output",
-                "e7373a8944a85d35"
-            ]
-        ]
-    },
-    {
         "id": "debug_real_output",
         "type": "debug",
         "z": "entry_room_light_tab",
@@ -298,7 +347,7 @@
         "targetType": "msg",
         "statusVal": "payload",
         "statusType": "auto",
-        "x": 1410,
+        "x": 1550,
         "y": 200,
         "wires": []
     },
@@ -330,7 +379,7 @@
         "LEDCurrentLimit": 0.02,
         "LEDForwardVoltage": 1,
         "openTimeout": "5000",
-        "x": 1400,
+        "x": 1540,
         "y": 100,
         "wires": [
             []
@@ -353,8 +402,8 @@
         "topic": "",
         "payload": "{\"enable\":true,\"intervalMs\":500}",
         "payloadType": "json",
-        "x": 330,
-        "y": 640,
+        "x": 250,
+        "y": 1390,
         "wires": [
             [
                 "a1b2c3d4e5f60103"
@@ -378,8 +427,8 @@
         "topic": "",
         "payload": "{\"enable\":false}",
         "payloadType": "json",
-        "x": 330,
-        "y": 700,
+        "x": 250,
+        "y": 1450,
         "wires": [
             [
                 "a1b2c3d4e5f60103"
@@ -398,8 +447,8 @@
         "initialize": "",
         "finalize": "let timer = context.get(\"blinkTimer\");\nif (timer) {\n    clearInterval(timer);\n    context.set(\"blinkTimer\", null);\n}\ncontext.set(\"outputState\", 0);",
         "libs": [],
-        "x": 570,
-        "y": 670,
+        "x": 490,
+        "y": 1420,
         "wires": [
             [
                 "dad6b01b7ba5fc57",
@@ -420,8 +469,8 @@
         "LEDCurrentLimit": 0.02,
         "LEDForwardVoltage": 1,
         "openTimeout": "5000",
-        "x": 820,
-        "y": 680,
+        "x": 740,
+        "y": 1430,
         "wires": [
             []
         ]
@@ -439,7 +488,7 @@
         "finalize": "",
         "libs": [],
         "x": 450,
-        "y": 440,
+        "y": 460,
         "wires": [
             [
                 "entry_room_light_logic_final"
@@ -481,7 +530,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 600,
+        "x": 660,
         "y": 720,
         "wires": []
     },
@@ -498,8 +547,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 830,
-        "y": 600,
+        "x": 750,
+        "y": 1350,
         "wires": []
     },
     {
@@ -557,8 +606,8 @@
         "inputMode": 1,
         "powerSupply": 1,
         "openTimeout": "5000",
-        "x": 440,
-        "y": 360,
+        "x": 420,
+        "y": 240,
         "wires": [
             [
                 "d8e4f9288e867109",
@@ -579,8 +628,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 580,
-        "y": 280,
+        "x": 820,
+        "y": 240,
         "wires": []
     },
     {
@@ -629,8 +678,8 @@
         "initialize": "",
         "finalize": "const handle = context.get('tickerHandle');\nif (handle) {\n    clearInterval(handle);\n}\ncontext.set('tickerHandle', null);",
         "libs": [],
-        "x": 1080,
-        "y": 520,
+        "x": 1140,
+        "y": 460,
         "wires": [
             [
                 "entry_room_countdown_display_editor"
@@ -650,12 +699,12 @@
         "finalize": "const p = context.get('presenceHoldTimerHandle');\nif (p) clearTimeout(p);\nconst d = context.get('delayedOffTimerHandle');\nif (d) clearTimeout(d);\nflow.set('entryRoom_presenceEndTime', 0);\nflow.set('entryRoom_delayedOffEndTime', 0);",
         "libs": [],
         "x": 780,
-        "y": 520,
+        "y": 460,
         "wires": [
             [
                 "toggle_node_3_channel",
                 "entry_room_countdown_info_01",
-                "switch_boolean_to_numeric"
+                "9622d7548e14fb0d"
             ],
             []
         ]
@@ -672,8 +721,8 @@
         "initialize": "",
         "finalize": "node.status({});",
         "libs": [],
-        "x": 1360,
-        "y": 520,
+        "x": 1420,
+        "y": 460,
         "wires": [
             []
         ]
@@ -1032,8 +1081,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 750,
-        "y": 420,
+        "x": 470,
+        "y": 320,
         "wires": [
             [
                 "entry_room_light_logic_final",
@@ -1057,8 +1106,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1140,
-        "y": 420,
+        "x": 780,
+        "y": 320,
         "wires": []
     },
     {
@@ -1111,8 +1160,8 @@
         "outport": "",
         "base64": false,
         "multicast": "broad",
-        "x": 1120,
-        "y": 900,
+        "x": 1500,
+        "y": 700,
         "wires": []
     },
     {
@@ -1132,8 +1181,8 @@
         "topic": "",
         "payload": "TURN-ALL-LIGHTS-ON",
         "payloadType": "str",
-        "x": 920,
-        "y": 860,
+        "x": 1300,
+        "y": 740,
         "wires": [
             [
                 "40bf793e62bf40df"
@@ -1157,8 +1206,8 @@
         "topic": "",
         "payload": "TURN-ALL-LIGHTS-OFF",
         "payloadType": "str",
-        "x": 890,
-        "y": 940,
+        "x": 1310,
+        "y": 660,
         "wires": [
             [
                 "40bf793e62bf40df"
@@ -1177,7 +1226,7 @@
         "initialize": "node.status({ fill: 'green', shape: 'ring', text: 'idle' });",
         "finalize": "const timer = context.get('offTimer');\nif (timer) {\n    clearTimeout(timer);\n    context.set('offTimer', null);\n}\nnode.status({});",
         "libs": [],
-        "x": 1080,
+        "x": 980,
         "y": 700,
         "wires": [
             [
@@ -1199,8 +1248,27 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 520,
-        "y": 540,
+        "x": 460,
+        "y": 520,
         "wires": []
+    },
+    {
+        "id": "9622d7548e14fb0d",
+        "type": "subflow:4a53066011ea704c",
+        "z": "entry_room_light_tab",
+        "g": "158f74129c903276",
+        "name": "SWITCH TRUE / FALSE",
+        "x": 1210,
+        "y": 200,
+        "wires": [
+            [
+                "debug_real_output",
+                "e7373a8944a85d35"
+            ],
+            [
+                "debug_real_output",
+                "e7373a8944a85d35"
+            ]
+        ]
     }
 ]
