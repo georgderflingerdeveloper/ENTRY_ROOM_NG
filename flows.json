@@ -70,6 +70,19 @@
         "h": 82
     },
     {
+        "id": "dd9b72ce8d871c74",
+        "type": "junction",
+        "z": "entry_room_light_tab",
+        "x": 1480,
+        "y": 700,
+        "wires": [
+            [
+                "40bf793e62bf40df",
+                "broadcast_status_monitor"
+            ]
+        ]
+    },
+    {
         "id": "switch_boolean_to_numeric",
         "type": "switch",
         "z": "4a53066011ea704c",
@@ -330,7 +343,8 @@
         "wires": [
             [
                 "toggle_node_3_channel",
-                "ae017495d68e6ddd"
+                "ae017495d68e6ddd",
+                "udp_parser_status_monitor"
             ]
         ]
     },
@@ -1086,10 +1100,12 @@
         "wires": [
             [
                 "entry_room_light_logic_final",
-                "debug_presence_seq"
+                "debug_presence_seq",
+                "presence_status_monitor"
             ],
             [
-                "debug_presence_seq"
+                "debug_presence_seq",
+                "presence_status_monitor"
             ]
         ]
     },
@@ -1106,8 +1122,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 780,
-        "y": 320,
+        "x": 800,
+        "y": 280,
         "wires": []
     },
     {
@@ -1128,7 +1144,8 @@
             [
                 "debug_button_events",
                 "entry_room_light_off_timer",
-                "entry_room_light_logic_final"
+                "entry_room_light_logic_final",
+                "button_event_status_monitor"
             ]
         ]
     },
@@ -1161,7 +1178,7 @@
         "outport": "",
         "base64": false,
         "multicast": "broad",
-        "x": 1500,
+        "x": 1620,
         "y": 700,
         "wires": []
     },
@@ -1186,7 +1203,7 @@
         "y": 740,
         "wires": [
             [
-                "40bf793e62bf40df"
+                "dd9b72ce8d871c74"
             ]
         ]
     },
@@ -1211,7 +1228,7 @@
         "y": 660,
         "wires": [
             [
-                "40bf793e62bf40df"
+                "dd9b72ce8d871c74"
             ]
         ]
     },
@@ -1264,12 +1281,94 @@
         "wires": [
             [
                 "debug_real_output",
-                "e7373a8944a85d35"
+                "e7373a8944a85d35",
+                "a1b2c3d4e5f6"
             ],
             [
                 "debug_real_output",
-                "e7373a8944a85d35"
+                "e7373a8944a85d35",
+                "a1b2c3d4e5f6"
             ]
         ]
+    },
+    {
+        "id": "a1b2c3d4e5f6",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "LIGHT STATUS MONITOR",
+        "func": "// --------------------------------------------------\n// LIGHT STATUS MONITOR\n// --------------------------------------------------\n\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\nfunction clearUpdateTimer() {\n\n    const timer = context.get('updateTimer');\n\n    if (timer) {\n        clearInterval(timer);\n        context.set('updateTimer', null);\n    }\n}\n\nfunction startUpdateTimer(lightOnSince) {\n\n    clearUpdateTimer();\n\n    const timer = setInterval(() => {\n\n        const durationSec =\n            Math.floor((Date.now() - lightOnSince) / 1000);\n\n        const timestamp =\n            new Date(lightOnSince).toLocaleTimeString();\n\n        setStatus(\n            'green',\n            'dot',\n            `${timestamp} | ON ${durationSec}s`\n        );\n\n    }, 1000);\n\n    context.set('updateTimer', timer);\n}\n\nconst isOn = !!msg.payload;\n\n// --------------------------------------------------\n// LIGHT ON\n// --------------------------------------------------\n\nif (isOn) {\n\n    let lightOnSince = context.get('lightOnSince');\n\n    // first ON edge\n    if (!lightOnSince) {\n\n        lightOnSince = Date.now();\n\n        context.set(\n            'lightOnSince',\n            lightOnSince\n        );\n\n        startUpdateTimer(lightOnSince);\n    }\n\n    return null;\n}\n\n// --------------------------------------------------\n// LIGHT OFF\n// --------------------------------------------------\n\nclearUpdateTimer();\n\ncontext.set('lightOnSince', null);\n\nsetStatus(\n    'grey',\n    'ring',\n    'LIGHT OFF'\n);\n\nreturn null;",
+        "outputs": 0,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'grey', shape: 'ring', text: 'LIGHT OFF' });",
+        "finalize": "",
+        "libs": [],
+        "x": 1500,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "presence_status_monitor",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "PRESENCE STATUS MONITOR",
+        "func": "// --------------------------------------------------\n// PRESENCE STATUS MONITOR\n// --------------------------------------------------\n\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\nconst isPresence = !!msg.payload;\n\nlet idleTimer = context.get('idleTimer');\n\n// --------------------------------------------------\n// PRESENCE DETECTED\n// --------------------------------------------------\n\nif (isPresence) {\n\n    if (idleTimer) {\n        clearTimeout(idleTimer);\n    }\n\n    const timestamp = new Date().toLocaleTimeString();\n\n    setStatus(\n        'green',\n        'dot',\n        `Presence detected ${timestamp}`\n    );\n\n    idleTimer = setTimeout(() => {\n\n        setStatus(\n            'grey',\n            'ring',\n            'idle'\n        );\n\n        context.set('idleTimer', null);\n\n    }, 15000);\n\n    context.set('idleTimer', idleTimer);\n\n    return null;\n}\n\nreturn null;",
+        "outputs": 0,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'grey', shape: 'ring', text: 'idle' });",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "udp_parser_status_monitor",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "UDP PARSER STATUS MONITOR",
+        "func": "// --------------------------------------------------\n// UDP PARSER STATUS MONITOR\n// --------------------------------------------------\n\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\nconst topic = msg.topic || 'unknown';\n\nconst timestamp = new Date().toLocaleTimeString();\n\nswitch (topic) {\n\n    case 'udp_light_on':\n        setStatus(\n            'green',\n            'dot',\n            `UDP LIGHT ON ${timestamp}`\n        );\n        break;\n\n    case 'udp_light_off':\n        setStatus(\n            'grey',\n            'ring',\n            `UDP LIGHT OFF ${timestamp}`\n        );\n        break;\n\n    case 'udp_light_longpush':\n        setStatus(\n            'yellow',\n            'dot',\n            `UDP LONG PUSH ${timestamp}`\n        );\n        break;\n\n    case 'presence_detected':\n        setStatus(\n            'blue',\n            'dot',\n            `PRESENCE ${timestamp}`\n        );\n        break;\n\n    default:\n        setStatus(\n            'red',\n            'ring',\n            `${topic}`\n        );\n}\n\nreturn null;",
+        "outputs": 0,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'grey', shape: 'ring', text: 'idle' });",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "button_event_status_monitor",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "BUTTON EVENT STATUS MONITOR",
+        "func": "// --------------------------------------------------\n// BUTTON EVENT STATUS MONITOR\n// --------------------------------------------------\n\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\nlet clearTimer = context.get('clearTimer');\n\nif (clearTimer) {\n    clearTimeout(clearTimer);\n}\n\nconst topic = msg.topic || 'unknown';\nconst timestamp = new Date().toLocaleTimeString();\n\nswitch (topic) {\n\n    case 'button_right_entry_shortpush':\n\n        setStatus(\n            'green',\n            'dot',\n            `SHORT PUSH ${timestamp}`\n        );\n        break;\n\n    case 'button_right_entry_longpush':\n\n        setStatus(\n            'yellow',\n            'dot',\n            `LONG PUSH ${timestamp}`\n        );\n        break;\n\n    case 'button_pressed':\n\n        setStatus(\n            'blue',\n            'dot',\n            `BUTTON PRESSED ${timestamp}`\n        );\n        break;\n\n    case 'button_released':\n\n        setStatus(\n            'grey',\n            'ring',\n            `BUTTON RELEASED ${timestamp}`\n        );\n        break;\n\n    default:\n\n        setStatus(\n            'red',\n            'ring',\n            `${topic} ${timestamp}`\n        );\n}\n\nclearTimer = setTimeout(() => {\n\n    setStatus(\n        'grey',\n        'ring',\n        'idle'\n    );\n\n    context.set('clearTimer', null);\n\n}, 15000);\n\ncontext.set('clearTimer', clearTimer);\n\nreturn null;",
+        "outputs": 0,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'grey', shape: 'ring', text: 'idle' });",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "broadcast_status_monitor",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "BROADCAST STATUS MONITOR",
+        "func": "// --------------------------------------------------\n// BROADCAST STATUS MONITOR\n// --------------------------------------------------\n\nfunction setStatus(fill, shape, text) {\n    node.status({ fill, shape, text });\n}\n\nlet clearTimer = context.get('clearTimer');\n\nif (clearTimer) {\n    clearTimeout(clearTimer);\n}\n\nconst topic = msg.topic || 'unknown';\nconst payload = msg.payload;\nconst timestamp = new Date().toLocaleTimeString();\n\nswitch (topic) {\n\n    case 'TURN-ALL-LIGHTS-ON':\n\n        setStatus(\n            'green',\n            'dot',\n            `ALL LIGHTS ON ${timestamp}`\n        );\n        break;\n\n    case 'TURN-ALL-LIGHTS-OFF':\n\n        setStatus(\n            'red',\n            'dot',\n            `ALL LIGHTS OFF ${timestamp}`\n        );\n        break;\n\n    default:\n\n        setStatus(\n            'yellow',\n            'ring',\n            `${topic}: ${payload} ${timestamp}`\n        );\n}\n\nclearTimer = setTimeout(() => {\n\n    setStatus(\n        'grey',\n        'ring',\n        'idle'\n    );\n\n    context.set('clearTimer', null);\n\n}, 15000);\n\ncontext.set('clearTimer', clearTimer);\n\nreturn null;",
+        "outputs": 0,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "node.status({ fill: 'grey', shape: 'ring', text: 'idle' });",
+        "finalize": "",
+        "libs": [],
+        "x": 1680,
+        "y": 760,
+        "wires": []
     }
 ]
