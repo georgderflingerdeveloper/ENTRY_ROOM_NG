@@ -1101,7 +1101,8 @@
             [
                 "entry_room_light_logic_final",
                 "debug_presence_seq",
-                "presence_status_monitor"
+                "presence_status_monitor",
+                "pientry_motion_telegram"
             ],
             [
                 "debug_presence_seq",
@@ -1369,6 +1370,40 @@
         "libs": [],
         "x": 1680,
         "y": 760,
+        "wires": []
+    },
+    {
+        "id": "pientry_motion_telegram",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "PIENTRY · Bewegungstelegramm",
+        "func": "if (msg.topic !== \"presence_detected\" || msg.payload !== true) {\n    return null;\n}\nconst seq = context.get(\"seq\") + 1;\ncontext.set(\"seq\", seq);\nreturn {payload: JSON.stringify({\n    v: 1, detector: \"DetectorEntryRoom\", kind: \"motion\", state: \"Active\",\n    ts: new Date().toISOString(), boot: context.get(\"boot\"), seq\n})};",
+        "outputs": 1,
+        "initialize": "context.set(\"boot\", RED.util.generateId());\ncontext.set(\"seq\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 380,
+        "wires": [
+            [
+                "pientry_motion_udp"
+            ]
+        ]
+    },
+    {
+        "id": "pientry_motion_udp",
+        "type": "udp out",
+        "z": "entry_room_light_tab",
+        "name": "Präsenz · UDP 10001",
+        "addr": "192.168.0.255",
+        "iface": "",
+        "port": "10001",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "broad",
+        "x": 1200,
+        "y": 380,
         "wires": []
     }
 ]
