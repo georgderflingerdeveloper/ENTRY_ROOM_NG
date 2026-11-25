@@ -331,8 +331,8 @@
         "type": "function",
         "z": "entry_room_light_tab",
         "name": "Parse UDP Command",
-        "func": "let udpText = (msg.payload || '').toString().trim();\n\n// --------------------------------------------------\n// CHANNEL 3 LIGHT\n// --------------------------------------------------\n\nif (udpText.includes('_3_True')) {\n    return {\n        topic: 'udp_light_on',\n        payload: true\n    };\n}\n\nif (udpText.includes('_3_False')) {\n    return {\n        topic: 'udp_light_off',\n        payload: false\n    };\n}\n\n\n\n// --------------------------------------------------\n// IGNORE EVERYTHING ELSE\n// --------------------------------------------------\n\nreturn null;\n",
-        "outputs": 1,
+        "func": "// Direct commands set a state. Physical button edges still use the toggle on output 1.\nif (msg.ip === \"192.168.0.149\") {\n    if (msg.payload === \"ENTRY-LIGHT-ON\") return [null, {topic:\"udp_light_on\", payload:true}];\n    if (msg.payload === \"ENTRY-LIGHT-OFF\") return [null, {topic:\"udp_light_off\", payload:false}];\n}\n\nlet udpText = (msg.payload || '').toString().trim();\n\n// --------------------------------------------------\n// CHANNEL 3 LIGHT\n// --------------------------------------------------\n\nif (udpText.includes('_3_True')) {\n    return {\n        topic: 'udp_light_on',\n        payload: true\n    };\n}\n\nif (udpText.includes('_3_False')) {\n    return {\n        topic: 'udp_light_off',\n        payload: false\n    };\n}\n\n\n\n// --------------------------------------------------\n// IGNORE EVERYTHING ELSE\n// --------------------------------------------------\n\nreturn null;\n",
+        "outputs": 2,
         "timeout": "",
         "noerr": 0,
         "initialize": "",
@@ -345,6 +345,9 @@
                 "toggle_node_3_channel",
                 "ae017495d68e6ddd",
                 "udp_parser_status_monitor"
+            ],
+            [
+                "entry_room_light_logic_final"
             ]
         ]
     },
@@ -1404,6 +1407,49 @@
         "multicast": "broad",
         "x": 1200,
         "y": 380,
+        "wires": []
+    },
+    {
+        "id": "entry_health_get",
+        "type": "http in",
+        "z": "entry_room_light_tab",
+        "name": "Raumstatus lesen",
+        "url": "/vorraum/verbindung",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 1440,
+        "wires": [
+            [
+                "entry_health_reply"
+            ]
+        ]
+    },
+    {
+        "id": "entry_health_reply",
+        "type": "function",
+        "z": "entry_room_light_tab",
+        "name": "Vorraumsteuerung erreichbar",
+        "func": "msg.headers = {\"Cache-Control\":\"no-store\"};\nmsg.payload = {room:\"vorraum\", probe:msg.req.query.probe};\nreturn msg;",
+        "outputs": 1,
+        "x": 470,
+        "y": 1440,
+        "wires": [
+            [
+                "entry_health_http"
+            ]
+        ]
+    },
+    {
+        "id": "entry_health_http",
+        "type": "http response",
+        "z": "entry_room_light_tab",
+        "name": "Statusantwort",
+        "statusCode": "",
+        "headers": {},
+        "x": 730,
+        "y": 1440,
         "wires": []
     }
 ]
